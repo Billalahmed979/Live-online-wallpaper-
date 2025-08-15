@@ -2,37 +2,46 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Live Video Rotator</title>
+<title>Dynamic YouTube Screensaver</title>
 <style>
-  html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; background: black; }
-  iframe { width: 100%; height: 100%; border: none; }
+  html, body { margin: 0; padding: 0; height: 100%; background: black; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  #player { width: 100%; height: 100%; border: none; flex-grow: 1; }
+  #inputForm { position: fixed; top: 10px; left: 50%; transform: translateX(-50%); z-index: 10; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 5px; }
+  input[type=text] { width: 300px; padding: 5px; border-radius: 3px; border: none; }
+  button { padding: 5px 10px; border: none; border-radius: 3px; background: #00bfff; color: white; cursor: pointer; }
 </style>
 </head>
 <body>
-<iframe id="videoFrame" src=""></iframe>
+
+<div id="inputForm">
+  <input type="text" id="youtubeURL" placeholder="Paste YouTube link here">
+  <button onclick="loadVideo()">Play</button>
+</div>
+
+<iframe id="player" src="" allow="autoplay; fullscreen" allowfullscreen></iframe>
 
 <script>
-const videos = [
-  "https://www.earthcam.com/cameras/embed/timessquare/?cam=tsrobo1",
-  "https://www.earthcam.com/cameras/embed/miami/?cam=miamibeach",
-  "https://www.skylinewebcams.com/webcam/italia/lazio/roma/colosseo.html",
-  "https://explore.org/livecams/african-wildlife/african-watering-hole-animal-camera",
-  "https://www.ustream.tv/embed/9408562"
-];
-
-let index = 0;
-const iframe = document.getElementById("videoFrame");
-
-function loadVideo() {
-  iframe.src = videos[index];
-  index = (index + 1) % videos.length;
+function getVideoID(url) {
+  // ইউটিউব URL থেকে ভিডিও ID বের করা
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+  const match = url.match(regExp);
+  return (match && match[2].length == 11) ? match[2] : null;
 }
 
-// প্রথম ভিডিও লোড
-loadVideo();
+function loadVideo() {
+  const url = document.getElementById('youtubeURL').value.trim();
+  const videoID = getVideoID(url);
+  if(videoID) {
+    const embedURL = `https://www.youtube.com/embed/${videoID}?autoplay=1&mute=1&loop=1&playlist=${videoID}&modestbranding=1`;
+    document.getElementById('player').src = embedURL;
+  } else {
+    alert('Invalid YouTube URL!');
+  }
+}
 
-// প্রতি 5 মিনিটে রোটেট (300000ms)
-setInterval(loadVideo, 300000);
+// Optional: Auto play a default video on load
+// loadVideo("https://www.youtube.com/watch?v=VIDEO_ID");
 </script>
+
 </body>
 </html>
